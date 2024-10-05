@@ -15,28 +15,6 @@
     </form>
 </div>
 
-<script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-
-    document.getElementById('password-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const password = document.getElementById('password').value;
-
-        fetch('/set-password', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token, password })
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message === 'User registered successfully') {
-                    window.location.href = '/welcome';
-                } else {
-                    alert(data.message);
-                }
-            });
-    });
-</script>
+<script src="/script.js"></script>
 </body>
 </html>

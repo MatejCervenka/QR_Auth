@@ -1,5 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
 const qrcode = require('qrcode');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -77,6 +78,64 @@ app.post('/login', (req, res) => {
     } else {
         res.status(401).json({ message: 'Invalid username or password' });
     }
+});
+
+
+// Set up file upload handling using multer
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    filename: function(req, file, cb) {
+        cb(null, `${Date.now()}-${file.originalname}`);
+    }
+});
+const upload = multer({ storage });
+
+// Middleware to verify token and set user in request
+function authenticate(req, res, next) {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ message: 'Unauthorized' });
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded.username;  // Set username in request
+        next();
+    } catch (err) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+}
+
+
+// Profile Routes
+app.get('/profile', authenticate, (req, res) => {
+    const user = users[req.user];
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Send user profile (excluding the password)
+    res.json({
+        username: req.user,
+        name: user.name,
+        surname: user.surname,
+        photo: user.photo
+    });
+});
+
+app.put('/profile', authenticate, upload.single('photo'), (req, res) => {
+    const { name, surname } = req.body;
+    const user = users[req.user];
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Update profile fields
+    user.name = name || user.name;
+    user.surname = surname || user.surname;
+
+    // If a new photo is uploaded, store the path to the photo
+    if (req.file) {
+        user.photo = req.file.path;
+    }
+
+    res.json({ message: 'Profile updated successfully' });
 });
 
 app.listen(PORT, () => {

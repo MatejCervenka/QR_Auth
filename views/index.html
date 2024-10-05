@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <div class="container">
@@ -19,25 +19,6 @@
     <p>Already registered? <a href="/login">Login here</a></p> <!-- Link to login page -->
 </div>
 
-<script>
-    document.getElementById('username-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const username = document.getElementById('username').value;
-
-        fetch('/register', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({username})
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.qrCode) {
-                    document.getElementById('qr-code-container').innerHTML = `<img src="${data.qrCode}" alt="QR Code">`;
-                } else {
-                    alert(data.message);
-                }
-            });
-    });
-</script>
+<script src="/script.js"></script>
 </body>
 </html>
